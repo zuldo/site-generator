@@ -1,5 +1,9 @@
+---
+title: pages
+---
+
 # Pages
 
-{{ list pages }}
+The following list is generated with \{{list pages}}.
 
-{{ endlist }}
+{{list pages}}

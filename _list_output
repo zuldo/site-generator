@@ -7,7 +7,7 @@
 Title
 </h1>
 <p>
-Content replaced into {{content}}. Escaped with {{content}}.
+Content replaced into {{content}}. Escaped with {{\content}}.
 </p>
 <h1 id="about-site">About site</h1>
 <p>This is generated using a custom site generator.</p>

@@ -11,16 +11,37 @@ function iterate-directory {
 	done
 }
 
+function replace-in-string {
+	echo "$3" | sed -E "s/$1/$2/"
+}
+
+function remove-from-string {
+	#echo "$2" | sed -E "s/$1//"
+	replace-in-string "$1" "" "$2"
+}
+
+function string-contains {
+	if echo "$2" | grep -Eoq "$1"; then
+		echo true
+	else
+		echo false
+	fi
+}
+
+: '
 function parse-lists {
 	# if _lists already exists, remove it.
 	[[ ! -f _lists ]] || command rm _lists
 	# get parts of input file that represent lists.
-	# grep -Eo '\{\{ *list *\S* *\}\}' "$1" > _lists
-	grep -Poz '\{\{ *list *\S* *\}\}[\s\S]*\{\{ *endlist *\}\}' "$1" > _lists
+	grep -Po "\{\{ *list *\S* *\}\}[\s\S]*\{\{ *endlist *\}\}" "$1" > _lists
 	# iterate on lines in _lists.
 	while read line; do
 		# extract the list source.
-		list=$(echo "$line" | sed -r "s/\{\{ *list *(\S*) *\}\}/\1/")
+		list=$(echo "$line" | sed -E "s/\{\{ *list *//")
+		list=$(echo "$list" | sed -E "s/ *\}\} *\{\{ *endlist *\}\}//")
+		# extract the list parameters.
+
+
 		# if _files already exists, remove it.
 		[[ ! -f _files ]] || command rm _files
 		# iterate on files in the list source, and add to file_contents.
@@ -33,9 +54,38 @@ function parse-lists {
 			file_contents="${file_contents}${content}"
 		done
 		# replace the original list template in the input file with the combined list contents.
-		awk -i inplace -v template="$line" -v content="$file_contents" '{gsub(template, content); print}' "$output_file"
+		awk -i inplace -v template="$line" -v content="$file_contents" "{gsub(template, content); print}" "$output_file"
 	done < _lists
 	command rm _lists
+}
+'
+
+function parse-lists {
+	# if output file exists already, delete it. then create new, empty one.
+	command rm -f _list_output
+	touch _list_output
+	# iterate on lines in input file.
+	while read line; do
+		source=""
+		output_line="$line"
+		if $(string-contains "[^\\]\{\{ *list +" "$line"); then
+			source=$(remove-from-string ".*\{\{ *list +" "$line")
+			source=$(remove-from-string " *\}\}.*" "$source")
+			output_line=""
+		fi
+		if $(string-contains "[^\\]\{\{ *endlist *\}\}" "$line"); then
+			source=""
+			output_line=""
+		fi
+
+		if $(string-contains "\{\{ *title *\}\}" "$line"); then
+			echo
+		fi
+
+		if [[ -n output_line ]]; then
+			echo "$output_line" >> _list_output
+		fi
+	done < "$1"
 }
 
 function parse-page {
@@ -43,10 +93,13 @@ function parse-page {
 	filename=$(basename "${file%.*}")
 
 	output_file="_output/$filename.html"
+	command rm -f "$output_file"
+
 	cp _templates/default.html "$output_file"
 	content=$(pandoc -f markdown $file)
 	awk -i inplace -v content="$content" '{gsub("{{content}}", content); print}' "$output_file"
 	parse-lists "$output_file"
+	cp -f _list_output "$output_file"
 
 	awk -i inplace '{gsub("{{\\\\", "{{"); print}' "$output_file"
 }
