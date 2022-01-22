@@ -1,3 +1,5 @@
 # Pages
 
 {{ list pages }}
+
+{{ endlist }}

@@ -12,16 +12,28 @@ function iterate-directory {
 }
 
 function parse-lists {
+	# if _lists already exists, remove it.
 	[[ ! -f _lists ]] || command rm _lists
-	grep -Eo '\{\{ *list *\S* *\}\}' "$1" > _lists
+	# get parts of input file that represent lists.
+	# grep -Eo '\{\{ *list *\S* *\}\}' "$1" > _lists
+	grep -Poz '\{\{ *list *\S* *\}\}[\s\S]*\{\{ *endlist *\}\}' "$1" > _lists
+	# iterate on lines in _lists.
 	while read line; do
+		# extract the list source.
 		list=$(echo "$line" | sed -r "s/\{\{ *list *(\S*) *\}\}/\1/")
+		# if _files already exists, remove it.
 		[[ ! -f _files ]] || command rm _files
+		# iterate on files in the list source, and add to file_contents.
+		file_contents=""
 		for file in "$list"/*; do
+			# only accept regular files.
 			[[ -f "$file" ]] || continue
+			# store the file content in a variable for easy string append, then append.
 			content=$(< "$file")
-			awk -i inplace -v template="$line" -v content="$content" '{gsub(template, content); print}' "$output_file"
+			file_contents="${file_contents}${content}"
 		done
+		# replace the original list template in the input file with the combined list contents.
+		awk -i inplace -v template="$line" -v content="$file_contents" '{gsub(template, content); print}' "$output_file"
 	done < _lists
 	command rm _lists
 }
