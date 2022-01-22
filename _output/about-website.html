@@ -1,0 +1,26 @@
+<head>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	<h1>
+		Title
+	</h1>
+	<p>
+		Content replaced into {{content}}. Escaped with {{\content}}.
+	</p>
+	<p>I use <a href="https://bolt80.com/piecrust/">PieCrust</a> to generate the entire site. Then I upload it to <a href="https://github.com/zuldo/zuldo.github.io">this</a> GitHub repo, which uses <a href="https://pages.github.com/">GitHub Pages</a> to host it.</p>
+<p>The CSS styling can be found <a href="/style.css">here</a>.</p>
+<p>The microblog page is generated with the following Jinja and Markdown:</p>
+{% raw %}
+<pre>
+{% for post in pagination.posts|sort(reverse=true, attribute="order") %}
+{{content}}lt;div id="{{post.order}}"{{content}}gt;
+    {{content}}lt;a href="#{{post.order}}"{{content}}gt;{{post.order}}{{content}}lt;/a{{content}}gt;
+    {{post.content}}
+{{content}}lt;/div{{content}}gt;
+{% endfor %}
+</pre>
+<p>{% endraw %}</p>
+<p>It seems like Vim modifies all timestamps when saving a file, and Jinja’s <code>date</code> uses one of these unless there’s metadata named that explicityl included in a file, so creation dates are only reliable for blog posts until I’ve added metadata to all existing pages.</p>
+</body>

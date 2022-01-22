@@ -1,0 +1,172 @@
+<head>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	<h1>
+		Title
+	</h1>
+	<p>
+		Content replaced into {{content}}. Escaped with {{\content}}.
+	</p>
+	<h1 id="pages">Pages</h1>
+<p>---
+title: About website
+order: 6
+---
+
+I use [PieCrust](https://bolt80.com/piecrust/) to generate the entire site. Then I upload it to [this](https://github.com/zuldo/zuldo.github.io) GitHub repo, which uses [GitHub Pages](https://pages.github.com/) to host it.
+
+The CSS styling can be found [here](/style.css).
+
+The microblog page is generated with the following Jinja and Markdown:
+
+{% raw %}
+<pre>
+{% for post in pagination.posts|sort(reverse=true, attribute="order") %}
+---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}lt;div id="{{post.order}}"---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}gt;
+	---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}lt;a href="#{{post.order}}"---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}gt;{{post.order}}---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}lt;/a---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}gt;
+	{{post.content}}
+---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}lt;/div---
+title: Glossary
+order: 7
+source: glossary
+---
+
+I may edit glossary entries at any time, without indicating it.
+
+{% if pagination.has_posts %}
+<section>
+    {% for post in glossary.posts|sort(attribute="order") %}
+	<div id="{{post.id}}">
+		<h2><a href="#{{post.id}}">{{post.title}}</a></h2>
+		{{post.content}}
+	</div>
+    {% endfor %}
+</section>
+{% endif %}gt;
+{% endfor %}
+</pre>
+{% endraw %}
+
+It seems like Vim modifies all timestamps when saving a file, and Jinja's `date` uses one of these unless there's metadata named that explicityl included in a file, so creation dates are only reliable for blog posts until I've added metadata to all existing pages.</p>
+</body>

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+function reload {
+	source tools
+}
+
+function iterate-directory {
+	for file in "$1"*; do
+		[[ -f "$file" ]] || continue
+		eval "${@:2}" "$file"
+	done
+}
+
+function parse-lists {
+	[[ ! -f _lists ]] || command rm _lists
+	grep -Eo '\{\{ *list *\S* *\}\}' "$1" > _lists
+	while read line; do
+		list=$(echo "$line" | sed -r "s/\{\{ *list *(\S*) *\}\}/\1/")
+		[[ ! -f _files ]] || command rm _files
+		for file in "$list"/*; do
+			[[ -f "$file" ]] || continue
+			content=$(< "$file")
+			awk -i inplace -v template="$line" -v content="$content" '{gsub(template, content); print}' "$output_file"
+		done
+	done < _lists
+	command rm _lists
+}
+
+function parse-page {
+	file="$1"
+	filename=$(basename "${file%.*}")
+
+	output_file="_output/$filename.html"
+	cp _templates/default.html "$output_file"
+	content=$(pandoc -f markdown $file)
+	awk -i inplace -v content="$content" '{gsub("{{content}}", content); print}' "$output_file"
+	parse-lists "$output_file"
+
+	awk -i inplace '{gsub("{{\\\\", "{{"); print}' "$output_file"
+}
+
+function generate-site {
+	command rm _output/*
+	for file in pages/*; do
+		[[ -f "$file" ]] || continue
+		parse-page "$file"
+	done
+
+	if [[ -f "assets/style.css" ]]; then
+		cp assets/style.css _output/style.css
+	fi
+}
